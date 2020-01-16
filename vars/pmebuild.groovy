@@ -46,7 +46,7 @@ def getBuildConfiguration(File buildConfigFile) {
     treatVariables(buildConfigFile, additionalVariables)
     treatVariables(buildConfigFile, additionalVariables) //TODO: don't know why it's needed twice
 
-    return readYaml buildConfigFile.text
+    return readYaml text: buildConfigFile.text
 }
 
 /**
