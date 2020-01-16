@@ -5,9 +5,9 @@
  * @param buildConfigFile the build config yaml file
  * @param pmeCliPath the pme cli path
  */
-def buildProjects(List<String> projectCollection, String settingsXmlId, File buildConfigFile, String pmeCliPath) {
+def buildProjects(List<String> projectCollection, String settingsXmlId, String buildConfigFilePath, String pmeCliPath) {
     println "Build projects ${projectCollection}"
-    def buildConfig = getBuildConfiguration(buildConfigFile)
+    def buildConfig = getBuildConfiguration(buildConfigFilePath)
     projectCollection.each { project -> buildProject(project, settingsXmlId, buildConfig, pmeCliPath) }
 }
 
@@ -46,7 +46,7 @@ def getBuildConfiguration(File buildConfigFile) {
     treatVariables(buildConfigFile, additionalVariables)
     treatVariables(buildConfigFile, additionalVariables) //TODO: don't know why it's needed twice
 
-    return readYaml text: buildConfigFile.text
+    return readYaml(text: buildConfigFile.text)
 }
 
 /**
