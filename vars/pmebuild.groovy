@@ -11,13 +11,10 @@ import org.yaml.snakeyaml.Yaml
 def buildProjects(List<String> projectCollection, String settingsXmlId, String buildConfigContent, String pmeCliPath) {
     println "Build projects ${projectCollection}"
 
-    println "1"
-    sh "ls"
     def buildConfigFileName="./temp_build_config${new Date().format("yyyyMMddHHmmSS")}.yaml"
-    println "2"
-    File buildConfigFile = new File(buildConfigFileName)
-    buildConfigFile.write buildConfigContent
+    writeFile([file: buildConfigFileName, text: buildConfigContent])
     sh "ls"
+    def buildConfigFile = readFile buildConfigFileName
 
     Map<String, Object> buildConfigMap = getBuildConfiguration(buildConfigFile)
     projectCollection.each { project -> buildProject(project, settingsXmlId, buildConfigMap, pmeCliPath) }
