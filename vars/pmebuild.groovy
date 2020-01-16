@@ -8,8 +8,9 @@ import org.yaml.snakeyaml.Yaml
  * @param buildConfig the build config yaml
  * @param pmeCliPath the pme cli path
  */
-def buildProjects(List<String> projectCollection, String settingsXmlId, File buildConfig, String pmeCliPath) {
+def buildProjects(List<String> projectCollection, String settingsXmlId, def buildConfig, String pmeCliPath) {
     println "Build projects ${projectCollection}"
+    println "buildConfig.getClass() ${buildConfig.getClass()}"
     Map<String, Object> buildConfigMap = getBuildConfiguration(buildConfig)
     projectCollection.each { project -> buildProject(project, settingsXmlId, buildConfigMap, pmeCliPath) }
 }
