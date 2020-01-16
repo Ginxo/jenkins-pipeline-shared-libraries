@@ -15,9 +15,9 @@ def buildProjects(List<String> projectCollection, String settingsXmlId, String b
     sh "ls"
     def buildConfigFileName="./temp_build_config${new Date().format("yyyyMMddHHmmSS")}.yaml"
     println "2"
-    sh "ls"
     File buildConfigFile = new File(buildConfigFileName)
     buildConfigFile.write buildConfigContent
+    sh "ls"
 
     Map<String, Object> buildConfigMap = getBuildConfiguration(buildConfigFile)
     projectCollection.each { project -> buildProject(project, settingsXmlId, buildConfigMap, pmeCliPath) }
