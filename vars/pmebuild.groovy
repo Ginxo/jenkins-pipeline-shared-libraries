@@ -1,4 +1,7 @@
-@Grab('org.yaml:snakeyaml:1.25')
+@Grapes([
+        @Grab(group='org.yaml', module='snakeyaml', version='1.25'),
+        @GrabConfig(systemClassLoader = true)
+])
 import org.yaml.snakeyaml.Yaml
 
 /**
