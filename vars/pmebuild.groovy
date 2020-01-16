@@ -5,13 +5,13 @@ import org.yaml.snakeyaml.Yaml
  *
  * @param projectCollection the project list to build
  * @param settingsXmlId the maven settings id from jenkins
- * @param buildConfigFile the build config yaml file
+ * @param buildConfig the build config yaml
  * @param pmeCliPath the pme cli path
  */
-def buildProjects(List<String> projectCollection, String settingsXmlId, String buildConfigFilePath, String pmeCliPath) {
+def buildProjects(List<String> projectCollection, String settingsXmlId, File buildConfig, String pmeCliPath) {
     println "Build projects ${projectCollection}"
-    Map<String, Object> buildConfig = getBuildConfiguration(buildConfigFilePath)
-    projectCollection.each { project -> buildProject(project, settingsXmlId, buildConfig, pmeCliPath) }
+    Map<String, Object> buildConfigMap = getBuildConfiguration(buildConfig)
+    projectCollection.each { project -> buildProject(project, settingsXmlId, buildConfigMap, pmeCliPath) }
 }
 
 /**
@@ -44,14 +44,13 @@ def buildProject(String project, String settingsXmlId, Map<String, Object> build
  * @param buildConfigFile the yaml file
  * @return the yaml map
  */
-def getBuildConfiguration(String buildConfigFilePath) {
+def getBuildConfiguration(File buildConfig) {
     def additionalVariables = [datetimeSuffix: new Date().format("yyyyMMdd")]
-    def buildConfigFile = new File(buildConfigFilePath)
-    treatVariables(buildConfigFile, additionalVariables)
-    treatVariables(buildConfigFile, additionalVariables) //TODO: don't know why it's needed twice
+    treatVariables(buildConfig, additionalVariables)
+    treatVariables(buildConfig, additionalVariables) //TODO: don't know why it's needed twice
 
     Yaml parser = new Yaml()
-    return parser.load(buildConfigFile.text)
+    return parser.load(buildConfig.text)
 }
 
 /**
