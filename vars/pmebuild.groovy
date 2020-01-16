@@ -10,7 +10,9 @@ import org.yaml.snakeyaml.Yaml
  */
 def buildProjects(List<String> projectCollection, String settingsXmlId, def buildConfig, String pmeCliPath) {
     println "Build projects ${projectCollection}"
-    println "buildConfig.getClass() ${buildConfig.getClass()}"
+    println "buildConfig.getClass() ${buildConfig.getClass()} value [${buildConfig}]"
+    println "File ${new File(buildConfig).text}"
+
     Map<String, Object> buildConfigMap = getBuildConfiguration(buildConfig)
     projectCollection.each { project -> buildProject(project, settingsXmlId, buildConfigMap, pmeCliPath) }
 }
