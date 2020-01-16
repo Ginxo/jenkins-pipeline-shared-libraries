@@ -11,7 +11,11 @@ import org.yaml.snakeyaml.Yaml
 def buildProjects(List<String> projectCollection, String settingsXmlId, String buildConfigContent, String pmeCliPath) {
     println "Build projects ${projectCollection}"
 
-    Map<String, Object> buildConfigMap = getBuildConfiguration(buildConfigContent)
+    def buildConfigFileName="temp_build_config${new Date().format("yyyyMMddHHmmSS")}.yaml"
+    File buildConfigFile = new File(buildConfigFileName)
+    buildConfigFile.write buildConfigContent
+
+    Map<String, Object> buildConfigMap = getBuildConfiguration(buildConfigFile)
     projectCollection.each { project -> buildProject(project, settingsXmlId, buildConfigMap, pmeCliPath) }
 }
 
@@ -45,13 +49,12 @@ def buildProject(String project, String settingsXmlId, Map<String, Object> build
  * @param buildConfigContent the yaml file content
  * @return the yaml map
  */
-def getBuildConfiguration(String buildConfigContent) {
+def getBuildConfiguration(File buildConfigFile) {
     def additionalVariables = [datetimeSuffix: new Date().format("yyyyMMdd")]
-    def buildConfigContentTreated = treatVariables(buildConfigContent, additionalVariables)
-//    treatVariables(buildConfigContent, additionalVariables) //TODO: don't know why it's needed twice
-    println "buildConfigContentTreated ${buildConfigContentTreated}"
+    treatVariables(buildConfigFile, additionalVariables)
+    treatVariables(buildConfigFile, additionalVariables)
     Yaml parser = new Yaml()
-    return parser.load(buildConfigContentTreated)
+    return parser.load(buildConfigFile.text)
 }
 
 /**
@@ -70,15 +73,13 @@ def getProjectConfiguration(String project, Map<String, Object> buildConfig) {
  * @param variableValues you can pass throw something like [productVersion: "1.0", milestone: "CRX"]
  * @return
  */
-def treatVariables(String buildConfigContent, Map<String, Object> variableValues = null) {
+def treatVariables(File buildConfig, Map<String, Object> variableValues = null) {
     AntBuilder antBuilder = new AntBuilder()
-    Map<String, Object> variables = getFileVariables(buildConfigContent) << (variableValues == null ? [:] : variableValues)
-    String buildConfigContentTreated = buildConfigContent
-    variables.each { key, value ->
-        buildConfigContentTreated = buildConfigContentTreated.replaceAll("{{${key}}}", value)
-    }
+    Map<String, Object> variables = getFileVariables(buildConfig) << (variableValues == null ? [:] : variableValues)
 
-    return buildConfigContentTreated
+    variables.each { key, value ->
+        antBuilder.replace(file: buildConfig, token: '{{' + key + '}}', value: value)
+    }
 }
 
 /**
@@ -86,9 +87,9 @@ def treatVariables(String buildConfigContent, Map<String, Object> variableValues
  * @param buildConfigContent the build config file content
  * @return a key:value map with #! variables from the  buildConfigFile
  */
-def getFileVariables(String buildConfigContent) {
+def getFileVariables(File buildConfig) {
     def variables = [:]
-    def matcher = buildConfigContent =~ /(#!)([a-zA-Z0-9_-]*)(=)(.*)/
+    def matcher = buildConfig.text =~ /(#!)([a-zA-Z0-9_-]*)(=)(.*)/
 
     matcher.each { value ->
         variables.put(value[2], value[4])
@@ -107,6 +108,7 @@ def executePME(String project, Map<String, Object> buildConfig, String pmeCliPat
     if (projectConfig != null) {
         List<String> customPmeParameters = projectConfig['customPmeParameters']
         println "PME parameters for ${project}: ${customPmeParameters.join(' ')}"
+        // TODO: pending pme flags
         sh "java -jar ${pmeCliPath} -DversionIncrementalSuffix=redhat -DallowConfigFilePrecedence=true -DprojectSrcSkip=false -DversionIncrementalSuffixPadding=5 -DversionSuffixStrip= ${customPmeParameters.join(' ')}"
     }
 }
