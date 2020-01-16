@@ -7,7 +7,7 @@
  */
 def buildProjects(List<String> projectCollection, String settingsXmlId, File buildConfigFile, String pmeCliPath) {
     println "Build projects ${projectCollection}"
-    def buildConfig = getBuildConfiguration(buildConfigFile)
+    Map<String, Object> buildConfig = getBuildConfiguration(buildConfigFile)
     projectCollection.each { project -> buildProject(project, settingsXmlId, buildConfig, pmeCliPath) }
 }
 
@@ -19,7 +19,7 @@ def buildProjects(List<String> projectCollection, String settingsXmlId, File bui
  * @param pmeCliPath the pme cli path
  * @param defaultGroup the default group in case the project is not defined as group/name
  */
-def buildProject(String project, String settingsXmlId, def buildConfig, String pmeCliPath, String defaultGroup = "kiegroup") {
+def buildProject(String project, String settingsXmlId, Map<String, Object> buildConfig, String pmeCliPath, String defaultGroup = "kiegroup") {
     def projectNameGroup = project.split("\\/")
     def group = projectNameGroup.size() > 1 ? projectNameGroup[0] : defaultGroup
     def name = projectNameGroup.size() > 1 ? projectNameGroup[1] : project
@@ -46,7 +46,7 @@ def getBuildConfiguration(File buildConfigFile) {
     treatVariables(buildConfigFile, additionalVariables)
     treatVariables(buildConfigFile, additionalVariables) //TODO: don't know why it's needed twice
 
-    return readYaml(text: buildConfigFile.text)
+    return readYaml(text:buildConfigFile.text)
 }
 
 /**
@@ -55,8 +55,7 @@ def getBuildConfiguration(File buildConfigFile) {
  * @param buildConfig the buildConfig map
  * @return the project configuration
  */
-def getProjectConfiguration(String project, def buildConfig) {
-    println "BUILD CONFIG ${buildConfig['builds']}"
+def getProjectConfiguration(String project, Map<String, Object> buildConfig) {
     return buildConfig['builds'].find { (project == it['project']) }
 }
 
@@ -66,7 +65,7 @@ def getProjectConfiguration(String project, def buildConfig) {
  * @param variableValues you can pass throw something like [productVersion: "1.0", milestone: "CRX"]
  * @return
  */
-def treatVariables(File buildConfigFile, def variableValues = null) {
+def treatVariables(File buildConfigFile, Map<String, Object> variableValues = null) {
     AntBuilder antBuilder = new AntBuilder()
     Map<String, Object> variables = getFileVariables(buildConfigFile) << (variableValues == null ? [:] : variableValues)
     variables.each { key, value ->
@@ -95,7 +94,7 @@ def getFileVariables(File buildConfigFile) {
  * @param buildConfig the buildConfig map
  * @param pmeCliPath the pme cli path
  */
-def executePME(String project, def buildConfig, String pmeCliPath) {
+def executePME(String project, Map<String, Object> buildConfig, String pmeCliPath) {
     def projectConfig = getProjectConfiguration(project, buildConfig)
     if (projectConfig != null) {
         List<String> customPmeParameters = projectConfig['customPmeParameters']
@@ -110,7 +109,7 @@ def executePME(String project, def buildConfig, String pmeCliPath) {
  * @param buildConfig
  * @return the goal for the project
  */
-def getMavenGoals(String project, def buildConfig) {
+def getMavenGoals(String project, Map<String, Object> buildConfig) {
     def Map<String, Object> projectConfig = getProjectConfiguration(project, buildConfig)
     return (projectConfig != null && projectConfig['buildScript'] != null ? projectConfig['buildScript'] : buildConfig['defaultBuildParameters']['buildScript']).minus("mvn ")
 }
