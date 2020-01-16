@@ -5,15 +5,13 @@ import org.yaml.snakeyaml.Yaml
  *
  * @param projectCollection the project list to build
  * @param settingsXmlId the maven settings id from jenkins
- * @param buildConfig the build config yaml
+ * @param buildConfigContent the build config yaml content
  * @param pmeCliPath the pme cli path
  */
-def buildProjects(List<String> projectCollection, String settingsXmlId, def buildConfig, String pmeCliPath) {
+def buildProjects(List<String> projectCollection, String settingsXmlId, String buildConfigContent, String pmeCliPath) {
     println "Build projects ${projectCollection}"
-    println "buildConfig.getClass() ${buildConfig.getClass()} value [${buildConfig}]"
-    println "File ${new File(buildConfig).text}"
 
-    Map<String, Object> buildConfigMap = getBuildConfiguration(buildConfig)
+    Map<String, Object> buildConfigMap = getBuildConfiguration(buildConfigContent)
     projectCollection.each { project -> buildProject(project, settingsXmlId, buildConfigMap, pmeCliPath) }
 }
 
@@ -44,16 +42,16 @@ def buildProject(String project, String settingsXmlId, Map<String, Object> build
 
 /**
  * Parses the build config yaml file to a map
- * @param buildConfigFile the yaml file
+ * @param buildConfigContent the yaml file content
  * @return the yaml map
  */
-def getBuildConfiguration(File buildConfig) {
+def getBuildConfiguration(String buildConfigContent) {
     def additionalVariables = [datetimeSuffix: new Date().format("yyyyMMdd")]
-    treatVariables(buildConfig, additionalVariables)
-    treatVariables(buildConfig, additionalVariables) //TODO: don't know why it's needed twice
-
+    def buildConfigContentTreated = treatVariables(buildConfigContent, additionalVariables)
+//    treatVariables(buildConfigContent, additionalVariables) //TODO: don't know why it's needed twice
+    println "buildConfigContentTreated ${buildConfigContentTreated}"
     Yaml parser = new Yaml()
-    return parser.load(buildConfig.text)
+    return parser.load(buildConfigContentTreated)
 }
 
 /**
@@ -68,26 +66,29 @@ def getProjectConfiguration(String project, Map<String, Object> buildConfig) {
 
 /**
  *
- * @param buildConfigFile
+ * @param buildConfigContent
  * @param variableValues you can pass throw something like [productVersion: "1.0", milestone: "CRX"]
  * @return
  */
-def treatVariables(File buildConfigFile, Map<String, Object> variableValues = null) {
+def treatVariables(String buildConfigContent, Map<String, Object> variableValues = null) {
     AntBuilder antBuilder = new AntBuilder()
-    Map<String, Object> variables = getFileVariables(buildConfigFile) << (variableValues == null ? [:] : variableValues)
+    Map<String, Object> variables = getFileVariables(buildConfigContent) << (variableValues == null ? [:] : variableValues)
+    String buildConfigContentTreated = buildConfigContent
     variables.each { key, value ->
-        antBuilder.replace(file: buildConfigFile, token: '{{' + key + '}}', value: value)
+        buildConfigContentTreated = buildConfigContentTreated.replaceAll("{{${key}}}", value)
     }
+
+    return buildConfigContentTreated
 }
 
 /**
  * Gets the variables #! and adds them to a map
- * @param buildConfigFile the build config file
+ * @param buildConfigContent the build config file content
  * @return a key:value map with #! variables from the  buildConfigFile
  */
-def getFileVariables(File buildConfigFile) {
+def getFileVariables(String buildConfigContent) {
     def variables = [:]
-    def matcher = buildConfigFile.text =~ /(#!)([a-zA-Z0-9_-]*)(=)(.*)/
+    def matcher = buildConfigContent =~ /(#!)([a-zA-Z0-9_-]*)(=)(.*)/
 
     matcher.each { value ->
         variables.put(value[2], value[4])
