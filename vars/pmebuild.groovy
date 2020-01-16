@@ -5,7 +5,7 @@
  * @param buildConfigFile the build config yaml file
  * @param pmeCliPath the pme cli path
  */
-def buildProjects(List<String> projectCollection, String settingsXmlId, String buildConfigFile, String pmeCliPath) {
+def buildProjects(List<String> projectCollection, String settingsXmlId, File buildConfigFile, String pmeCliPath) {
     println "Build projects ${projectCollection}"
     def buildConfig = getBuildConfiguration(buildConfigFile)
     projectCollection.each { project -> buildProject(project, settingsXmlId, buildConfig, pmeCliPath) }
