@@ -46,13 +46,10 @@ def buildProject(String project, String settingsXmlId, Map<String, Object> build
  */
 def getBuildConfiguration(String buildConfigContent) {
     def additionalVariables = [datetimeSuffix: new Date().format("yyyyMMdd")]
-    Map<String, Object> variables = getFileVariables(buildConfigContent) << additionalVariables
-
-    def buildConfigContentTreated = treatVariables(buildConfigContent, variables)
-    buildConfigContentTreated = treatVariables(buildConfigContentTreated, variables)
-
+    treatVariables(buildConfigContent, additionalVariables)
+    treatVariables(buildConfigContent, additionalVariables)
     Yaml parser = new Yaml()
-    return parser.load(buildConfigContentTreated)
+    return parser.load(buildConfigContent)
 }
 
 /**
@@ -68,15 +65,17 @@ def getProjectConfiguration(String project, Map<String, Object> buildConfig) {
 /**
  *
  * @param buildConfigContent
- * @param variables you can pass throw something like [productVersion: "1.0", milestone: "CRX"]
+ * @param variableValues you can pass throw something like [productVersion: "1.0", milestone: "CRX"]
  * @return
  */
-def treatVariables(String buildConfigContent, Map<String, Object> variables) {
-    def content = buildConfigContent
+def treatVariables(String buildConfigContent, Map<String, Object> variableValues = null) {
+    AntBuilder antBuilder = new AntBuilder()
+    Map<String, Object> variables = getFileVariables(buildConfigContent) << (variableValues == null ? [:] : variableValues)
+
     variables.each { key, value ->
-        content = content.replaceAll('\\{\\{' + key + '}}', value)
+        buildConfigContent = buildConfigContent.replaceAll('\\{{')
+        antBuilder.replace(file: buildConfig, token: '{{' + key + '}}', value: value) // TODO
     }
-    return content
 }
 
 /**
