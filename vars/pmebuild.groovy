@@ -50,14 +50,8 @@ def getBuildConfiguration(String buildConfigContent) {
     def additionalVariables = [datetimeSuffix: new Date().format("yyyyMMdd")]
     Map<String, Object> variables = getFileVariables(buildConfigContent) << additionalVariables
 
-    println "buildConfigContent1 ${buildConfigContent}"
     def buildConfigContentTreated = treatVariables(buildConfigContent, variables)
-    println "buildConfigContent2A ${buildConfigContent}"
-    println "buildConfigContent2B ${buildConfigContentTreated}"
-    buildConfigContentTreated = treatVariables(buildConfigContentTreated, variables)
-
-    println "buildConfigContent3A ${buildConfigContent}"
-    println "buildConfigContent3B ${buildConfigContentTreated}"
+    println "buildConfigContent ${buildConfigContentTreated}"
 
     Yaml parser = new Yaml()
     return parser.load(buildConfigContentTreated)
@@ -84,7 +78,9 @@ def treatVariables(String buildConfigContent, Map<String, Object> variables) {
     variables.each { key, value ->
         content = content.replaceAll('\\{\\{' + key + '}}', value)
     }
-    return content
+    def matcher = content =~ /\{\{[a-zA-Z_0-9]*\}\}/
+
+    return matcher.find() ? treatVariables(content, variables) : content
 }
 
 /**
