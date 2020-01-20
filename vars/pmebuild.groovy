@@ -12,7 +12,6 @@ def buildProjects(List<String> projectCollection, String settingsXmlId, String b
     println "Build projects ${projectCollection}. Build path ${buildConfigPath}"
     def buildConfigContent = readFile buildConfigPath
     Map<String, Object> buildConfigMap = getBuildConfiguration(buildConfigContent)
-    println "buildConfigMap1 ${buildConfigMap}"
     projectCollection.each { project -> buildProject(project, settingsXmlId, buildConfigMap, pmeCliPath) }
 }
 
@@ -51,7 +50,6 @@ def getBuildConfiguration(String buildConfigContent) {
     Map<String, Object> variables = getFileVariables(buildConfigContent) << additionalVariables
 
     def buildConfigContentTreated = treatVariables(buildConfigContent, variables)
-    println "buildConfigContent ${buildConfigContentTreated}"
 
     Yaml parser = new Yaml()
     return parser.load(buildConfigContentTreated)
