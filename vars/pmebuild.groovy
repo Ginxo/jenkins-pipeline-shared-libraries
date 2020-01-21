@@ -8,11 +8,11 @@ import org.yaml.snakeyaml.Yaml
  * @param buildConfigContent the build config yaml content
  * @param pmeCliPath the pme cli path
  */
-def buildProjects(List<String> projectCollection, String settingsXmlId, String buildConfigPath, String pmeCliPath) {
+def buildProjects(List<String> projectCollection, String settingsXmlId, String buildConfigPath, String pmeCliPath, String deploymentRepoUrl) {
     println "Build projects ${projectCollection}. Build path ${buildConfigPath}"
     def buildConfigContent = readFile buildConfigPath
     Map<String, Object> buildConfigMap = getBuildConfiguration(buildConfigContent)
-    projectCollection.each { project -> buildProject(project, settingsXmlId, buildConfigMap, pmeCliPath) }
+    projectCollection.each { project -> buildProject(project, settingsXmlId, buildConfigMap, pmeCliPath, deploymentRepoUrl) }
 }
 
 /**
@@ -23,7 +23,7 @@ def buildProjects(List<String> projectCollection, String settingsXmlId, String b
  * @param pmeCliPath the pme cli path
  * @param defaultGroup the default group in case the project is not defined as group/name
  */
-def buildProject(String project, String settingsXmlId, Map<String, Object> buildConfig, String pmeCliPath, String defaultGroup = "kiegroup") {
+def buildProject(String project, String settingsXmlId, Map<String, Object> buildConfig, String pmeCliPath, String deploymentRepoUrl, String defaultGroup = "kiegroup") {
     def projectNameGroup = project.split("\\/")
     def group = projectNameGroup.size() > 1 ? projectNameGroup[0] : defaultGroup
     def name = projectNameGroup.size() > 1 ? projectNameGroup[1] : project
@@ -36,7 +36,8 @@ def buildProject(String project, String settingsXmlId, Map<String, Object> build
 
     executePME("${finalProjectName}", buildConfig, pmeCliPath)
     String goals = getMavenGoals("${finalProjectName}", buildConfig)
-    maven.runMavenWithSettings(settingsXmlId, goals, new Properties())
+    
+    maven.runMavenWithSettings(settingsXmlId, "${goals} -DrepositoryId=indy -DaltDeploymentRepository=indy::default::${deploymentRepoUrl}", new Properties())
     sh "cd .."
 }
 
