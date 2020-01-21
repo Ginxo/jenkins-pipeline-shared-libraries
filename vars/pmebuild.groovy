@@ -35,6 +35,7 @@ def buildProject(String project, String settingsXmlId, Map<String, Object> build
     println "pwd1"
     sh "pwd"
     githubscm.checkoutIfExists(name, "$CHANGE_AUTHOR", "$CHANGE_BRANCH", group, "$CHANGE_TARGET")
+    sh "ls"
     println "pwd2"
     sh "pwd"
 
