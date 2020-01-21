@@ -32,19 +32,12 @@ def buildProject(String project, String settingsXmlId, Map<String, Object> build
     println "Building ${finalProjectName}"
     sh "mkdir -p ${group}_${name}"
     dir("${env.WORKSPACE}/${group}_${name}") {
-        println "pwd1"
-        sh "pwd"
         githubscm.checkoutIfExists(name, "$CHANGE_AUTHOR", "$CHANGE_BRANCH", group, "$CHANGE_TARGET")
-        sh "ls"
-        println "pwd2"
-        sh "pwd"
 
         executePME("${finalProjectName}", buildConfig, pmeCliPath)
         String goals = getMavenGoals("${finalProjectName}", buildConfig)
         
         maven.runMavenWithSettings(settingsXmlId, "${goals} -DrepositoryId=indy -DaltDeploymentRepository=indy::default::${deploymentRepoUrl}", new Properties())
-        println "pwd3"
-        sh "pwd"
     }
 }
 
