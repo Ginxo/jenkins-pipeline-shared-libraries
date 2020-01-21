@@ -5,12 +5,12 @@ import org.yaml.snakeyaml.Yaml
  *
  * @param projectCollection the project list to build
  * @param settingsXmlId the maven settings id from jenkins
- * @param buildConfigContent the build config yaml content
+ * @param buildConfigPathFolder the build config folder where groovy and yaml files are contained
  * @param pmeCliPath the pme cli path
  */
-def buildProjects(List<String> projectCollection, String settingsXmlId, String buildConfigPath, String pmeCliPath, String deploymentRepoUrl) {
-    println "Build projects ${projectCollection}. Build path ${buildConfigPath}"
-    def buildConfigContent = readFile buildConfigPath
+def buildProjects(List<String> projectCollection, String settingsXmlId, String buildConfigPathFolder, String pmeCliPath, String deploymentRepoUrl) {
+    println "Build projects ${projectCollection}. Build path ${buildConfigPathFolder}"
+    def buildConfigContent = readFile "${buildConfigPathFolder}/build-config.yaml"
     Map<String, Object> buildConfigMap = getBuildConfiguration(buildConfigContent)
     projectCollection.each { project -> buildProject(project, settingsXmlId, buildConfigMap, pmeCliPath, deploymentRepoUrl) }
 }
@@ -46,8 +46,8 @@ def buildProject(String project, String settingsXmlId, Map<String, Object> build
  * @param buildConfigContent the yaml file content
  * @return the yaml map
  */
-def getBuildConfiguration(String buildConfigContent) {
-    def additionalVariables = [datetimeSuffix: new Date().format("yyyyMMdd")]
+def getBuildConfiguration(String buildConfigContent, String buildConfigPathFolder) {
+    def additionalVariables = [datetimeSuffix: new Date().format("yyyyMMdd"), groovyScriptsPath: buildConfigPathFolder]
     Map<String, Object> variables = getFileVariables(buildConfigContent) << additionalVariables
 
     def buildConfigContentTreated = treatVariables(buildConfigContent, variables)
