@@ -11,7 +11,7 @@ import org.yaml.snakeyaml.Yaml
 def buildProjects(List<String> projectCollection, String settingsXmlId, String buildConfigPathFolder, String pmeCliPath, String deploymentRepoUrl) {
     println "Build projects ${projectCollection}. Build path ${buildConfigPathFolder}"
     def buildConfigContent = readFile "${buildConfigPathFolder}/build-config.yaml"
-    Map<String, Object> buildConfigMap = getBuildConfiguration(buildConfigContent)
+    Map<String, Object> buildConfigMap = getBuildConfiguration(buildConfigContent, buildConfigPathFolder)
     projectCollection.each { project -> buildProject(project, settingsXmlId, buildConfigMap, pmeCliPath, deploymentRepoUrl) }
 }
 
