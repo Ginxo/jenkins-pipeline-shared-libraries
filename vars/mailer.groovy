@@ -35,14 +35,14 @@ def sendEmail_unstablePR(String additionalSubject = null ) {
 
 def sendEmail_fixedPR(String additionalSubject = null ) {
     emailext(
-            subject: "${additionalSubject?.trim() || additionalSubject?.trim() != null ? additionalSubject?.trim() : 'PR'} #$ghprbPullId of $ghprbGhRepository: $ghprbPullTitle is fixed and was SUCCESSFUL",
+            subject: "${additionalSubject?.trim() || additionalSubject?.trim() != null ? additionalSubject?.trim() : 'PR'} #$ghprbPullId of $ghprbGhRepository: $ghprbPullTitle is fixed and was successful",
             body: "",
             recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']])
 }
 
 def sendEmail_abortedPR(String additionalSubject = null ) {
     emailext(
-            subject: "${additionalSubject?.trim() || additionalSubject?.trim() != null ? additionalSubject?.trim() : 'PR'} #$ghprbPullId of $ghprbGhRepository: $ghprbPullTitle was ABORTED",
+            subject: "${additionalSubject?.trim() || additionalSubject?.trim() != null ? additionalSubject?.trim() : 'PR'} #$ghprbPullId of $ghprbGhRepository: $ghprbPullTitle was aborted",
             body: "",
             recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']])
 }
