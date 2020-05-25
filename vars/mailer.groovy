@@ -16,7 +16,7 @@ def sendEmail_failedPR(String additionalSubject = null ) {
                    (IMPORTANT: For visiting the links you need to have access to Red Hat VPN. In case you don\'t have access to RedHat VPN please download and decompress attached file.)
                    """,
             attachmentsPattern: "error.log.gz",
-            to: emailextrecipients ([[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']]))
+            recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']])
 }
 
 def sendEmail_unstablePR(String additionalSubject = null ) {
@@ -46,7 +46,6 @@ def sendEmail_abortedPR(String additionalSubject = null ) {
             body: "",
             recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']])
 }
-
 
 def buildLogScriptPR () {
     dir("$WORKSPACE") {
