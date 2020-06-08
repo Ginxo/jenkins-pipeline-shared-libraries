@@ -47,6 +47,7 @@ def sendEmail_abortedPR(String additionalSubject = null ) {
             recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']])
 }
 
+
 def buildLogScriptPR () {
     dir("$WORKSPACE") {
         sh 'touch trace.sh'
