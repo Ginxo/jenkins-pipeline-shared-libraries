@@ -1,10 +1,12 @@
 import com.homeaway.devtools.jenkins.testing.JenkinsPipelineSpecification
+import groovy.json.JsonSlurper
 import hudson.plugins.git.GitSCM
 
 class GithubScmSpec extends JenkinsPipelineSpecification {
     def groovyScript = null
     def pullRequestInfo = null
     def pullRequestInfoEmpty = null
+    def jsonSuppler = new JsonSlurper()
 
     def setup() {
         groovyScript = loadPipelineScriptForTest("vars/githubscm.groovy")
@@ -24,6 +26,9 @@ class GithubScmSpec extends JenkinsPipelineSpecification {
         pullRequestInfo = new File(url.toURI()).text
         def urlEmpty = getClass().getResource('/pull_request_empty.json')
         pullRequestInfoEmpty = new File(urlEmpty.toURI()).text
+        getPipelineMock("readJSON")(['text': pullRequestInfo]) >> jsonSuppler.parseText(pullRequestInfo)
+        getPipelineMock("readJSON")(['text': pullRequestInfoEmpty]) >> jsonSuppler.parseText(pullRequestInfoEmpty)
+
     }
 
     def "[githubscm.groovy] resolveRepository"() {
@@ -43,6 +48,7 @@ class GithubScmSpec extends JenkinsPipelineSpecification {
         1 * getPipelineMock("github.call")(['credentialsId': 'kie-ci', 'repoOwner': 'author', 'repository': 'repository', 'traits': [['$class': 'org.jenkinsci.plugins.github_branch_source.BranchDiscoveryTrait', 'strategyId': 3], ['$class': 'org.jenkinsci.plugins.github_branch_source.OriginPullRequestDiscoveryTrait', 'strategyId': 1], ['$class': 'org.jenkinsci.plugins.github_branch_source.ForkPullRequestDiscoveryTrait', 'strategyId': 1, 'trust': ['$class': 'TrustPermission']]]]) >> 'github'
         1 * getPipelineMock("resolveScm")(['source': 'github', 'ignoreErrors': true, 'targets': ['branches']]) >> gitSCM
         1 * getPipelineMock("checkout")(gitSCM)
+
         1 * getPipelineMock("sh")(['returnStdout': true, 'script': "curl -H \"Authorization: token oauth_token\" 'https://api.github.com/repos/defaultAuthor/repository/pulls?head=author:branches&state=open'"]) >> pullRequestInfo
     }
 
