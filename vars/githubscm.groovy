@@ -185,6 +185,7 @@ def hasForkPullRequest(String group, String repository, String author, String br
     def result = false
     withCredentials([string(credentialsId: credentialsId, variable: 'OAUTHTOKEN')]) {
         def curlResult = sh(returnStdout: true, script: "curl -H \"Authorization: token ${OAUTHTOKEN}\" 'https://api.github.com/repos/${group}/${repository}/pulls?head=${author}:${branch}&state=open'")?.trim()
+        println "curlResult ${curlResult}"
         if (curlResult) {
             def pullRequestJsonObject = jsonSlurper.parseText(curlResult)
             result = pullRequestJsonObject.size() > 0
