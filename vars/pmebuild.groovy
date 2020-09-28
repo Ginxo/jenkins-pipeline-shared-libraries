@@ -39,7 +39,7 @@ def buildProject(String project, String settingsXmlId, Map<String, Object> build
     def group = projectGroupName[0]
     def name = projectGroupName[1]
     def finalProjectName = "${group}/${name}"
-    dir("${env.WORKSPACE}/${group}_${name}") {
+    dir("${env.WORKSPACE}/${name}") {
         def projectConfig = getProjectConfiguration(finalProjectName, buildConfig)
 
         executePME(finalProjectName, projectConfig, pmeCliPath, settingsXmlId, variableVersionsMap)
@@ -68,8 +68,8 @@ def checkoutProjects(List<String> projectCollection, Map<String, Object> buildCo
         def projectGroupName = util.getProjectGroupName(project)
         def group = projectGroupName[0]
         def name = projectGroupName[1]
-        if(!fileExists("${env.WORKSPACE}/${group}_${name}")) {
-            dir("${env.WORKSPACE}/${group}_${name}") {
+        if(!fileExists("${env.WORKSPACE}/${name}")) {
+            dir("${env.WORKSPACE}/${name}") {
                 checkoutProject(name, group, getProjectConfiguration("${group}/${name}", buildConfig), buildConfigAdditionalVariables)
             }
         } else {

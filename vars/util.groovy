@@ -14,8 +14,8 @@ def checkoutProjects(List<String> projectCollection, String limitProject = null)
         if (isProjectTriggeringJob(projectGroupName)) {
             checkoutProject(name, group)
         } else {
-            sh "mkdir -p ${group}_${name}"
-            dir("${env.WORKSPACE}/${group}_${name}") {
+            sh "mkdir -p ${name}"
+            dir("${env.WORKSPACE}/${name}") {
                 checkoutProject(name, group)
             }
         }
@@ -113,7 +113,7 @@ def buildProject(String project, String settingsXmlId, String goals, Boolean ski
     if (isProjectTriggeringJob(projectGroupName) == true) {
         maven.runMavenWithSettings(settingsXmlId, goals, skipTests != null ? skipTests : new Properties(), "${group}_${name}.maven.log")
     } else {
-        dir("${env.WORKSPACE}/${group}_${name}") {
+        dir("${env.WORKSPACE}/${name}") {
             maven.runMavenWithSettings(settingsXmlId, goals, skipTests != null ? skipTests : new Properties(), "${group}_${name}.maven.log")
         }
     }
