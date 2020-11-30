@@ -19,7 +19,6 @@ def runMaven(String goals, boolean skipTests, List options=[], String logFileNam
 
 def runMavenWithSettings(String settingsXmlId, String goals, Properties properties, String logFileName = null) {
     new MavenCommand(this, ['-fae'])
-        .withSettingsXmlId(settingsXmlId)
         .withProperties(properties)
         .withLogFileName(logFileName)
         .run(goals)
@@ -27,7 +26,6 @@ def runMavenWithSettings(String settingsXmlId, String goals, Properties properti
 
 def runMavenWithSettings(String settingsXmlId, String goals, boolean skipTests, String logFileName = null) {
     new MavenCommand(this, ['-fae'])
-        .withSettingsXmlId(settingsXmlId)
         .skipTests(skipTests)
         .withLogFileName(logFileName)
         .run(goals)
@@ -54,7 +52,6 @@ String getSubmarineSettingsXmlId(){
 def runMavenWithSettingsSonar(String settingsXmlId, String goals, String sonarCloudId, String logFileName = null) {
     withCredentials([string(credentialsId: sonarCloudId, variable: 'TOKEN')]) {
         new MavenCommand(this)
-            .withSettingsXmlId(settingsXmlId)
             .withProperty('sonar.login', "${TOKEN}")
             .withLogFileName(logFileName)
             .run(goals)
